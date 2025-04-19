@@ -675,22 +675,24 @@
                         </div>
                     </div>
                     <div class="md:w-1/2 p-12">
-                        <form class="space-y-6">
+                        <form action="https://formspree.io/f/xkgjlaaz" method="POST" class="space-y-6">
+                            <!-- Hidden field for email subject -->
+                            <input type="hidden" name="_subject" value="New Contact Form Submission - Vicitech">
                             <div>
                                 <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                                <input type="text" id="name" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition duration-300 hover:border-indigo-300 shadow-sm" placeholder="Your name">
+                                <input type="text" id="name" name="name" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition duration-300 hover:border-indigo-300 shadow-sm" placeholder="Your name">
                             </div>
                             <div>
                                 <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                <input type="email" id="email" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition duration-300 hover:border-indigo-300 shadow-sm" placeholder="Your email">
+                                <input type="email" id="email" name="email" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition duration-300 hover:border-indigo-300 shadow-sm" placeholder="Your email">
                             </div>
                             <div>
                                 <label for="company" class="block text-sm font-medium text-gray-700 mb-1">Company</label>
-                                <input type="text" id="company" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition duration-300 hover:border-indigo-300 shadow-sm" placeholder="Your company">
+                                <input type="text" id="company" name="company" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition duration-300 hover:border-indigo-300 shadow-sm" placeholder="Your company">
                             </div>
                             <div>
                                 <label for="message" class="block text-sm font-medium text-gray-700 mb-1">How can we help?</label>
-                                <textarea id="message" rows="4" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition duration-300 hover:border-indigo-300 shadow-sm" placeholder="Tell us about your project"></textarea>
+                                <textarea id="message" name="message" rows="4" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition duration-300 hover:border-indigo-300 shadow-sm" placeholder="Tell us about your project"></textarea>
                             </div>
                             <div>
                                 <button type="submit" class="w-full bg-gradient-to-r from-blue-900 to-purple-900 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-800 hover:to-purple-800 transition duration-300 shadow-md transform hover:scale-105 btn-gradient">
@@ -816,6 +818,62 @@
                 behavior: 'smooth'
             });
         });
+        
+        // Custom form submission with Formspree via AJAX
+        const contactForm = document.querySelector('form');
+        if (contactForm) {
+            contactForm.addEventListener('submit', (e) => {
+                e.preventDefault(); // Prevent default form submission
+                
+                // Show loading state
+                const submitButton = contactForm.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton.innerHTML;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending...';
+                submitButton.disabled = true;
+                
+                // Get form data
+                const formData = new FormData(contactForm);
+                
+                // Submit form data to Formspree via fetch API
+                fetch(contactForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Network response was not ok.');
+                })
+                .then(data => {
+                    // Show success message
+                    contactForm.innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-check text-green-500 text-2xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-2">Thank You!</h3>
+                            <p class="text-gray-600 mb-6">Your message has been sent successfully. We'll get back to you shortly.</p>
+                        </div>
+                    `;
+                    
+                    // Scroll to the success message
+                    contactForm.scrollIntoView({ behavior: 'smooth' });
+                })
+                .catch(error => {
+                    // Reset button
+                    submitButton.innerHTML = originalButtonText;
+                    submitButton.disabled = false;
+                    
+                    // Show error message
+                    alert('Oops! There was a problem submitting your form. Please try again.');
+                    console.error('Error:', error);
+                });
+            });
+        }
         
         // Animate elements when they come into view
         const animateOnScroll = () => {
